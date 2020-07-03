@@ -1,0 +1,114 @@
+@startuml
+title Class Diagram
+
+enum Direction {
+    LEFT, RIGHT, UP, DOWN
+}
+
+class Cell {
+    + i: Int
+    + j: Int
+}
+
+class PlayGame {
+    + fun paint(g: Graphics)
+    + main()
+}
+
+abstract class GameSettings {
+    + backgroundColor: Color
+    + title: String
+    + fun getBackgroundColor(value: Int)
+    + fun getForegroundColor(value: Int)
+}
+
+class Game2048Settings {
+    + fun getBackgroundColor(value: Int)
+    + fun getForegroundColor(value: Int)
+}
+
+interface Game {
+    + fun initialize()
+    + fun hasWon(): Boolean
+    + fun canMove(): Boolean
+    + fun processMove(direction: Direction)
+    + operator fun get(i: Int, j: Int): Int?
+}
+
+class Game2048 {
+    + generator: Game2048ValueGenerator
+    + fun initialize()
+    + fun canMove(): Boolean
+    + fun hasWon(): Boolean
+    + fun processMove(direction: Direction): Boolean
+    + operator fun get(i: Int, j: Int): Int?
+    + fun GameBoard.addNewValue(generator: Game2048ValueGenerator): Boolean
+    + fun GameBoard.moveValues(direction: Direction): Boolean
+    + fun GameBoard.moveValuesInRowOrColumn(rowOrColumn: List<Cell>): Boolean
+}
+
+interface Game2048ValueGenerator {
+    + fun generateValue(gameBoard: GameBoard): Pair<Cell, Int>?
+}
+
+interface Game2048RandomValueGenerator {
+    + fun generateValue(gameBoard: GameBoard): Pair<Cell, Int>?
+}
+
+interface SquareBoard {
+    + fun getAllCells(): Collection<Cell>
+    + operator fun get(i: Int, j: Int): Cell
+    + fun getRow(i: Int, intRange: IntProgression): Collection<Cell>
+    + fun getColumn(iRange: IntProgression, j: Int): Collection<Cell>
+    + fun any(predicate: (Int?) -> Boolean): Boolean
+}
+
+class SquareBoardImpl {
+    + width: Int
+    + valuesMap: Map<Cell, Int?>
+    + fun getAllCells(): Collection<Cell>
+    + operator fun get(i: Int, j: Int): Cell
+    + fun getRow(i: Int, intRange: IntProgression): Collection<Cell>
+    + fun getColumn(iRange: IntProgression, j: Int): Collection<Cell>
+    + fun any(predicate: (Int?) -> Boolean): Boolean
+}
+
+interface GameBoard {
+    + operator fun get(cell: Cell): Int?
+    + operator fun set(cell: Cell, value: Int?)
+    + fun filter(predicate: (Int?) -> Boolean): Collection<Cell>
+}
+
+class GameBoardImpl {
+    + squareBoard: SquareBoard
+    + operator fun get(cell: Cell): Int?
+    + operator fun set(cell: Cell, value: Int?)
+    + fun filter(predicate: (Int?) -> Boolean): Collection<Cell>
+}
+
+JPanel <|-down- PlayGame
+PlayGame *-down- Direction
+
+GameSettings <|-down- Game2048Settings
+PlayGame *-down- GameSettings
+
+PlayGame *-down- Game
+Game <|-down- Game2048
+Game *-down- Direction
+Game2048 *-down- Direction
+
+Game2048 *-down- Game2048ValueGenerator
+Game2048ValueGenerator <|-down- Game2048RandomValueGenerator
+Game2048ValueGenerator *-down- Cell
+
+SquareBoard <|-down- GameBoard
+SquareBoard <|-down- SquareBoardImpl
+SquareBoard *-down- Cell
+SquareBoardImpl *-down- Cell
+GameBoard <|-down- GameBoardImpl
+GameBoard *-down- SquareBoard
+GameBoard *-down- Cell
+GameBoardImpl *-down- Cell
+Game2048 *-down- GameBoard
+
+@enduml
